@@ -1,0 +1,20 @@
+## Architecture
+
+**Data flow:** `src/index.ts` parses `process.argv` directly (no CLI framework) into three commands — `record`, `balance`, `find` — and delegates to `src/ledger.ts`. There is no in-memory session state: every `Ledger` method reads the on-disk JSON file fresh at the start and (for writes) rewrites it whole at the end. This is intentional, not an oversight — it guarantees the file is always the source of truth even if something else wrote to it between calls. Don't introduce caching without preserving that guarantee.
+
+**Storage:** transactions persist as a flat JSON array in `./ledger.json` (path hardcoded as `FILE` in `ledger.ts`).
+
+**Internal structures, and why:**
+- `src/linkedList.ts` — `LinkedList<T>` (singly linked, tracks `head`/`tail`/`length`) is used instead of a plain array to load transactions in `Ledger.load()`. Only `append` (O(1) via the `tail` pointer) and full traversal (`toArray`) are needed — the ledger is append-only and never needs random access, so a linked list is the deliberate choice here, not an array-in-disguise.
+- `src/binarySearch.ts` — `binarySearchFirst` implements the "leftmost occurrence" binary search variant (keeps searching left after a match instead of stopping), because `findByDate` in `ledger.ts` sorts transactions by date and multiple transactions can share the same date — a plain binary search would only guarantee finding *a* match, not the first one.
+- `src/types/types.ts` — `Transaction` interface and `TransactionType` enum (`DEBIT`/`CREDIT`); `balanceOf` sums `+amount` for `CREDIT` and `-amount` for `DEBIT` per account into a `Map<string, number>`.
+
+**CLI surface** (`src/index.ts`):
+- `record <account> <credit|debit> <amount> <desc...>` — appends a transaction dated today.
+- `balance <account>` — prints the net balance for an account.
+- `find <date>` — prints all transactions on a given date (YYYY-MM-DD), using the binary-search path above.
+
+## Project notes
+
+- `tsconfig.json` compiles `src/` to `dist/` targeting `es2022`/`commonjs`, `strict` mode on, and excludes `**/*.test.ts` from the build.
+- `PROGRESS.md` is a session/progress log the project keeps by convention (analogous to a `claude-progress.md` harness pattern) — check it for the current state and next-step plan before starting work, and keep it updated as you go.
