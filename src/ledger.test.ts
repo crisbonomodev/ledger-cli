@@ -41,4 +41,27 @@ describe('ledger-cli', () => {
     ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 10, description: 'x' });
     expect(ledger.findByDate('2099-01-01')).toEqual([]);
   });
+
+  it('returns an account history in chronological order with a running balance', () => {
+    const ledger = new Ledger()
+    ledger.record({ date: '2026-01-03', account: 'cash', type: TransactionType.DEBIT, amount: 20, description: 'third' });
+    ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 100, description: 'first' });
+    ledger.record({ date: '2026-01-02', account: 'cash', type: TransactionType.CREDIT, amount: 50, description: 'second' });
+
+    const history = ledger.history('cash');
+
+    expect(history.map(h => h.transaction.description)).toEqual(['first', 'second', 'third']);
+    expect(history.map(h => h.balance)).toEqual([100, 150, 130]);
+  });
+
+  it('excludes transactions belonging to other accounts', () => {
+    const ledger = new Ledger()
+    ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 10, description: 'cash tx' });
+    ledger.record({ date: '2026-01-01', account: 'savings', type: TransactionType.CREDIT, amount: 999, description: 'savings tx' });
+
+    const history = ledger.history('cash');
+
+    expect(history).toHaveLength(1);
+    expect(history[0].transaction.description).toBe('cash tx');
+  });
 });

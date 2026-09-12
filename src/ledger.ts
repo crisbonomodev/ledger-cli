@@ -44,6 +44,18 @@ export class Ledger {
         return balances.get(account) ?? 0
     }
 
+    history(account: string): { transaction: Transaction, balance: number }[] {
+        const transactions = this.load().toArray()
+            .filter((tx) => tx.account === account)
+            .sort((a, b) => a.date.localeCompare(b.date))
+
+        let balance = 0
+        return transactions.map((transaction) => {
+            balance += transaction.type === TransactionType.CREDIT ? transaction.amount : -transaction.amount
+            return { transaction, balance }
+        })
+    }
+
     findByDate(date: string): Transaction[] {
         const sorted = [...this.load().toArray()].sort((a,b) => a.date.localeCompare(b.date))
         const dates = sorted.map((t)=> t.date)

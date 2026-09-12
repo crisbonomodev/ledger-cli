@@ -19,14 +19,18 @@
       "area": "ledger",
       "title": "View an account's history",
       "user_visible_behavior": "A user runs `history <account>` and sees every transaction for that account in chronological order, with the running balance after each one.",
-      "status": "not_started",
+      "status": "passing",
       "verification": [
         "Record 3 transactions on the same account with different dates.",
         "Run `history <account>`.",
         "Verify the chronological order and that the running balance on each line is correct."
       ],
-      "evidence": [],
-      "notes": ""
+      "evidence": [
+        "npx vitest run src/ledger.test.ts -> 6 passed (6), including 'returns an account history in chronological order with a running balance' and 'excludes transactions belonging to other accounts' (src/ledger.test.ts:45-68)",
+        "npm run check && npm test -> tsc --noEmit clean, 6/6 tests pass",
+        "Manual CLI run in /tmp scratch dir: seeded ledger.json with 3 cash transactions appended out of date order (2026-01-05, 2026-01-01, 2026-01-03) plus 1 unrelated 'savings' transaction, then `node dist/index.js history cash` printed them sorted 01-01 -> 01-03 -> 01-05 with running balances 100, 150, 130 and correctly excluded the savings entry"
+      ],
+      "notes": "Ledger.history(account) added in src/ledger.ts; wired to `history <account>` CLI command in src/index.ts. Pre-existing bug noted (not in scope): the `record` CLI command always stamps today's date and does not parse 'credit'/'debit' argument strings into TransactionType — it only accepts the raw numeric enum value. Left unfixed since it predates this feature and isn't part of ledger-001's required behavior."
     },
     {
       "id": "ledger-002",

@@ -23,6 +23,13 @@ if (cmd === 'record') {
         console.log('No transactions for the specified date')
     }
     results.forEach((tx) => console.log(`#${tx.id} ${tx.account} ${tx.type} ${tx.amount} - ${tx.description}`))
+} else if (cmd === 'history') {
+    const entries = ledger.history(args[0])
+
+    if (entries.length === 0) {
+        console.log('No transactions for the specified account')
+    }
+    entries.forEach(({ transaction, balance }) => console.log(`${transaction.date} #${transaction.id} ${transaction.type} ${transaction.amount} - ${transaction.description} | balance: ${balance}`))
 } else {
-    console.log('Usage: record <account> <credit|debit> <amount> <desc> | balance <account> | find <date>')
+    console.log('Usage: record <account> <credit|debit> <amount> <desc> | balance <account> | find <date> | history <account>')
 }

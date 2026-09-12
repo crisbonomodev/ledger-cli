@@ -18,7 +18,7 @@ agents do not update it automatically.
 - Repository root: /Users/cbonomo/Code/ledger-cli
 - Standard startup path: ./init.sh
 - Standard verification path: npm run check && npm test
-- Current highest-priority unfinished feature: ledger-001 (View an account's history)
+- Current highest-priority unfinished feature: ledger-002 (Void a transaction without deleting it)
 - Current blocker: none
 
 ## Session Log
@@ -51,3 +51,15 @@ agents do not update it automatically.
 - Files or artifacts updated: CLAUDE.md, init.sh, harness/feature_list.json, harness/claude-progress.md
 - Known risk or unresolved issue: transfer (ledger-003) will need a way to keep save() from leaving the file half-written on failure — not designed yet.
 - Next best step: implement ledger-001 (history).
+
+### Session 003
+
+- Date: 2026-09-12
+- Goal: Implement ledger-001 (view an account's history).
+- Completed: `Ledger.history(account)` in src/ledger.ts (filters by account, sorts chronologically by date, computes running balance); wired to new `history <account>` CLI command in src/index.ts. Followed TDD: wrote 2 failing tests first (confirmed failure with "history is not a function"), then implemented.
+- Verification run: npm run check && npm test (6/6 passing); manual CLI run in an isolated /tmp scratch dir with ledger.json seeded with out-of-date-order transactions across two accounts, confirming `history cash` prints chronological order, correct running balance, and excludes the other account.
+- Evidence captured: src/ledger.test.ts:45-68 (2 new tests), full evidence trail recorded in harness/feature_list.json under ledger-001.
+- Commits: (pending — see next commit)
+- Files or artifacts updated: src/ledger.ts, src/index.ts, src/ledger.test.ts, harness/feature_list.json, harness/claude-progress.md
+- Known risk or unresolved issue: Found (but did not fix, out of scope) a pre-existing bug in the `record` CLI command in src/index.ts — it always stamps today's date and never parses "credit"/"debit" strings into TransactionType (only the raw numeric enum value works). This limited manual CLI verification of `record`, so history's CLI output was checked against a directly-seeded ledger.json instead. Worth a dedicated fix later.
+- Next best step: implement ledger-002 (void a transaction).
