@@ -7,8 +7,8 @@ You are working in a repository designed for long-running implementation work. P
 At the start of every session:
 
 1. Run `pwd` and confirm that you are in the expected repository root
-2. Read `claude-progress.md`
-3. Read `feature_list.json`
+2. Read `harness/claude-progress.md`
+3. Read `harness/feature_list.json`
 4. Review recent commits with `git log --oneline -5`
 5. Run `./init.sh`
 6. Run `npm run check && npm test` to confirm the baseline is green.
@@ -26,8 +26,8 @@ Then, select one unfinished feature and work only on that feature until you eith
 
 ## Required Files
 
-- feature_list.json
-- claude-progress.md
+- harness/feature_list.json
+- harness/claude-progress.md
 - init.sh
 - session-handoff.md when a compact handoff is useful
 
@@ -59,7 +59,7 @@ npx vitest run src/ledger.test.ts
 npx vitest run -t "encuentra la primera"   # filter by test name
 ```
 
-There is no lint script configured. Always run `npm run check && npm test` before considering a change done — that pairing is the project's own definition of "green" (see claude-progress.md).
+There is no lint script configured. Always run `npm run check && npm test` before considering a change done — that pairing is the project's own definition of "green" (see harness/claude-progress.md).
 
 ## Links
 

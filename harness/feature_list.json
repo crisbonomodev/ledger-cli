@@ -1,0 +1,63 @@
+{
+  "project": "ledger-cli",
+  "last_updated": "2026-09-12",
+  "rules": {
+    "single_active_feature": true,
+    "passing_requires_evidence": true,
+    "do_not_skip_verification": true
+  },
+  "status_legend": {
+    "not_started": "Work has not begun.",
+    "in_progress": "The feature is the current active task.",
+    "blocked": "Work cannot continue until a documented blocker is resolved.",
+    "passing": "Required verification has passed and evidence is recorded."
+  },
+  "features": [
+    {
+      "id": "ledger-001",
+      "priority": 1,
+      "area": "ledger",
+      "title": "Ver historial de una cuenta",
+      "user_visible_behavior": "Un usuario corre `history <cuenta>` y ve todas las transacciones de esa cuenta en orden cronológico, con el balance corriente después de cada una.",
+      "status": "not_started",
+      "verification": [
+        "Registrar 3 transacciones en la misma cuenta con fechas distintas.",
+        "Correr `history <cuenta>`.",
+        "Verificar el orden cronológico y que el balance corriente de cada línea sea correcto."
+      ],
+      "evidence": [],
+      "notes": ""
+    },
+    {
+      "id": "ledger-002",
+      "priority": 2,
+      "area": "ledger",
+      "title": "Anular una transacción sin borrarla",
+      "user_visible_behavior": "Un usuario corre `void <id>` y se agrega una transacción de reversión (crédito↔débito invertido); la transacción original sigue existiendo en el historial.",
+      "status": "not_started",
+      "verification": [
+        "Registrar una transacción y anotar su id.",
+        "Correr `void <id>`.",
+        "Verificar que el balance vuelve al valor previo a la transacción original.",
+        "Verificar que la transacción original sigue apareciendo en `history`, no fue borrada."
+      ],
+      "evidence": [],
+      "notes": "Depende de ledger-001 para verificar visualmente el efecto en el historial."
+    },
+    {
+      "id": "ledger-003",
+      "priority": 3,
+      "area": "ledger",
+      "title": "Transferir entre cuentas",
+      "user_visible_behavior": "Un usuario corre `transfer <origen> <destino> <monto>` y se registran dos transacciones atómicas: débito en origen y crédito en destino, o ninguna si falla.",
+      "status": "not_started",
+      "verification": [
+        "Correr `transfer cash savings 50`.",
+        "Verificar que el balance de cash bajó 50 y el de savings subió 50.",
+        "Simular una falla a mitad de camino y verificar que no queda ninguna de las dos transacciones a medias."
+      ],
+      "evidence": [],
+      "notes": "La parte más delicada: si save() falla entre las dos escrituras, no debe quedar solo una transacción registrada."
+    }
+  ]
+}
