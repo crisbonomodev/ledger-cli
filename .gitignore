@@ -1,0 +1,5 @@
+node_modules/
+dist/
+ledger.json
+.DS_Store
+PROGRESS.md
