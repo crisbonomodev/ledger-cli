@@ -11,14 +11,14 @@ describe('ledger-cli', () => {
     
   });
 
-  it('registra transacciones como log append-only y calcula balance', () => {
+  it('records transactions as an append-only log and computes balance', () => {
     const ledger = new Ledger()
-    ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 100, description: 'depósito inicial' }); 
-    ledger.record({ date: '2026-01-02', account: 'cash', type: TransactionType.DEBIT, amount: 30, description: 'compra' });
+    ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 100, description: 'initial deposit' });
+    ledger.record({ date: '2026-01-02', account: 'cash', type: TransactionType.DEBIT, amount: 30, description: 'purchase' });
     expect(ledger.balanceOf('cash')).toBe(70);
   });
 
-  it('mantiene balances separados por cuenta usando un hash map', () => {
+  it('keeps balances separated per account using a hash map', () => {
     const ledger = new Ledger()
     ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 50, description: 'a' });
     ledger.record({ date: '2026-01-01', account: 'revenue', type: TransactionType.CREDIT, amount: 200, description: 'b' });
@@ -26,7 +26,7 @@ describe('ledger-cli', () => {
     expect(ledger.balanceOf('revenue')).toBe(200);
   });
 
-  it('encuentra la primera y demás transacciones de una fecha con duplicados', () => {
+  it('finds the first and subsequent transactions for a date with duplicates', () => {
     const ledger = new Ledger()
     ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 10, description: 'x' });
     ledger.record({ date: '2026-01-03', account: 'cash', type: TransactionType.CREDIT, amount: 10, description: 'y' });
@@ -36,7 +36,7 @@ describe('ledger-cli', () => {
     expect(found[0].description).toBe('z');
   });
 
-  it('devuelve vacío si no hay transacciones en esa fecha', () => {
+  it('returns empty when there are no transactions on that date', () => {
     const ledger = new Ledger()
     ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 10, description: 'x' });
     expect(ledger.findByDate('2099-01-01')).toEqual([]);

@@ -24,5 +24,5 @@ if (cmd === 'record') {
     }
     results.forEach((tx) => console.log(`#${tx.id} ${tx.account} ${tx.type} ${tx.amount} - ${tx.description}`))
 } else {
-    console.log('Uso: record <account> <credit|debit> <amount> <desc> | balance <account> | find <date>')
+    console.log('Usage: record <account> <credit|debit> <amount> <desc> | balance <account> | find <date>')
 }
