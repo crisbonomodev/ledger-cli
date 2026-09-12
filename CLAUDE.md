@@ -13,12 +13,13 @@ At the start of every session:
 5. Run `./init.sh`
 6. Run `npm run check && npm test` to confirm the baseline is green.
 
-Then, select one unfinished feature and work only on that feature until you either verify it or document why it is blocked
+Then, select one unfinished feature, validate that the sprint contract exists for the selected task, and work only on that feature until you either verify it or document why it is blocked
 
 ## Rules
 
 - One active feature at a time.
 - Do not claim completion without runnable evidence.
+- Do not start the task if the sprint contract was not provided.
 - Do not rewrite the feature list to hide unfinished work.
 - Do not remove or weaken tests just to make the task look complete.
 - Use repository artifacts as the system of record.
@@ -28,12 +29,13 @@ Then, select one unfinished feature and work only on that feature until you eith
 
 - harness/feature_list.json
 - harness/claude-progress.md
+- harness/evaluator-rubric.md
 - init.sh
 - session-handoff.md when a compact handoff is useful
 
 ## Completion Gate
 
-A feature can move to passing only after the required verification succeeds and the result is recorded.
+A feature can move to passing only after the evaluator agent validates that the requirements are met and the result is recorded.
 
 ## Before You Stop
 - Update the progress log.
@@ -64,3 +66,4 @@ There is no lint script configured. Always run `npm run check && npm test` befor
 ## Links
 
 - ARCHITECTURE.md - Explains the project architecture.
+- CONVENTIONS.md - Explains the coding conventions for the project
