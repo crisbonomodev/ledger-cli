@@ -100,4 +100,55 @@ describe('ledger-cli', () => {
     expect(originalEntry?.transaction).toEqual(original);
     expect(history).toHaveLength(2);
   });
+
+  it('transferring moves the amount from source balance to destination balance', () => {
+    const ledger = new Ledger()
+    ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 100, description: 'seed' });
+    ledger.record({ date: '2026-01-01', account: 'savings', type: TransactionType.CREDIT, amount: 20, description: 'seed' });
+
+    ledger.transfer('cash', 'savings', 50);
+
+    expect(ledger.balanceOf('cash')).toBe(50);
+    expect(ledger.balanceOf('savings')).toBe(70);
+  });
+
+  it('returns a TransferResult where debit and credit share the debit id as transferId', () => {
+    const ledger = new Ledger()
+    ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 100, description: 'seed' });
+
+    const { debit, credit } = ledger.transfer('cash', 'savings', 50);
+
+    expect(debit.transferId).toBe(debit.id);
+    expect(credit.transferId).toBe(debit.id);
+    expect(debit.account).toBe('cash');
+    expect(debit.type).toBe(TransactionType.DEBIT);
+    expect(credit.account).toBe('savings');
+    expect(credit.type).toBe(TransactionType.CREDIT);
+    expect(debit.amount).toBe(50);
+    expect(credit.amount).toBe(50);
+  });
+
+  it('writes both the debit and credit entries to disk in a single transfer() call', () => {
+    const ledger = new Ledger()
+    ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 100, description: 'seed' });
+
+    const { debit, credit } = ledger.transfer('cash', 'savings', 50);
+
+    const onDisk: { id: number }[] = JSON.parse(fs.readFileSync(FILE, 'utf8'));
+    const ids = onDisk.map((tx) => tx.id);
+    expect(ids).toContain(debit.id);
+    expect(ids).toContain(credit.id);
+  });
+
+  it('does not touch or reorder any transaction that existed before the transfer', () => {
+    const ledger = new Ledger()
+    const first = ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 100, description: 'first' });
+    const second = ledger.record({ date: '2026-01-02', account: 'savings', type: TransactionType.CREDIT, amount: 20, description: 'second' });
+
+    ledger.transfer('cash', 'savings', 50);
+
+    const onDisk: unknown[] = JSON.parse(fs.readFileSync(FILE, 'utf8'));
+    expect(onDisk[0]).toEqual(first);
+    expect(onDisk[1]).toEqual(second);
+  });
 });

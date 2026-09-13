@@ -33,6 +33,10 @@ if (cmd === 'record') {
 } else if (cmd === 'void') {
     const reversal = ledger.void(Number(args[0]))
     console.log(`#${reversal.id} voids #${reversal.voidsId} - ${reversal.account} ${reversal.type} ${reversal.amount}`)
+} else if (cmd === 'transfer') {
+    const [source, destination, amountStr] = args
+    const { debit, credit } = ledger.transfer(source, destination, Number(amountStr))
+    console.log(`#${debit.id} ${debit.account} -> #${credit.id} ${credit.account} - ${debit.amount} (transferId ${debit.transferId})`)
 } else {
-    console.log('Usage: record <account> <credit|debit> <amount> <desc> | balance <account> | find <date> | history <account> | void <id>')
+    console.log('Usage: record <account> <credit|debit> <amount> <desc> | balance <account> | find <date> | history <account> | void <id> | transfer <source> <destination> <amount>')
 }

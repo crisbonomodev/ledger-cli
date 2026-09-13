@@ -1,6 +1,6 @@
 import * as fs from 'node:fs';
 import { LinkedList } from "./linkedList";
-import { Transaction, TransactionType } from './types/types';
+import { Transaction, TransactionType, TransferResult } from './types/types';
 import { binarySearchFirst } from './binarySearch';
 
 
@@ -70,6 +70,38 @@ export class Ledger {
             description: `Void of #${original.id}: ${original.description}`,
             voidsId: original.id,
         })
+    }
+
+    transfer(source: string, destination: string, amount: number): TransferResult {
+        const list = this.load()
+        const date = new Date().toISOString().slice(0, 10)
+
+        const debitId = list.size() + 1
+        const debit: Transaction = {
+            id: debitId,
+            date,
+            account: source,
+            type: TransactionType.DEBIT,
+            amount,
+            description: `Transfer to ${destination}`,
+            transferId: debitId,
+        }
+        list.append(debit)
+
+        const credit: Transaction = {
+            id: list.size() + 1,
+            date,
+            account: destination,
+            type: TransactionType.CREDIT,
+            amount,
+            description: `Transfer from ${source}`,
+            transferId: debit.id,
+        }
+        list.append(credit)
+
+        this.save(list)
+
+        return { debit, credit }
     }
 
     findByDate(date: string): Transaction[] {
