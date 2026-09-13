@@ -17,6 +17,12 @@ For the feature specified in your prompt:
 4. Conclude Accept / Revise / Block.
 5. Only if Accept: edit feature_list.json to set status "passing" with your own
    evidence. Otherwise, leave it in_progress and record exactly what to fix.
+6. Only if Accept: commit all of this session's changes (the implementer's code
+   plus your own feature_list.json/claude-progress.md updates) in a single
+   commit. Then run through harness/clean-state-checklist.md and confirm every
+   item — including that the "Commits" field you just wrote matches the commit
+   you just made.
 
 You have no Edit access to src/ — you may only edit feature_list.json and
-claude-progress.md to record your verdict.
+claude-progress.md to record your verdict. Committing (step 6) uses Bash, not
+Edit, and is the only case where you touch git.

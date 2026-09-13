@@ -30,6 +30,7 @@ Then, select one unfinished feature, validate that the sprint contract exists fo
 - harness/feature_list.json
 - harness/claude-progress.md
 - harness/evaluator-rubric.md
+- harness/clean-state-checklist.md
 - init.sh
 - session-handoff.md when a compact handoff is useful
 
@@ -41,8 +42,10 @@ A feature can move to passing only after the evaluator agent validates that the 
 - Update the progress log.
 - Update the feature state.
 - Record what is still broken or unverified.
-- Commit once the repository is safe to resume.
+- Commit only if your role's agent definition (.claude/agents/) says to — the
+  evaluator commits after an Accept verdict, the implementer never commits.
 - Leave a clean restart path for the next session.
+- Run through harness/clean-state-checklist.md and confirm every item before ending the session.
 
 ## Commands
 

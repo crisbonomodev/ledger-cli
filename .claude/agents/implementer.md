@@ -17,3 +17,7 @@ Rules:
 - You must NEVER set `status: "passing"` yourself — that decision belongs only to
   the evaluator subagent. Leave it `in_progress` with your evidence recorded.
 - Update harness/claude-progress.md with what you did before finishing.
+- You must NEVER run `git commit` (or `git add` in preparation for one). Leave
+  all changes uncommitted in the working tree. Committing is the evaluator's
+  responsibility alone, and only happens after it accepts the work — writing
+  "Commits: (pending)" and leaving it at that is not your job to reconcile later.
