@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import fs from 'fs';
 import { Ledger } from './ledger';
 import { TransactionType } from './types/types';
-import { InvalidAmountError } from './errors';
+import { InvalidAmountError, SameAccountError, InsufficientFundsError, TransactionNotFoundError } from './errors';
 
 const FILE = './ledger.json';
 
@@ -165,5 +165,41 @@ describe('ledger-cli', () => {
     expect(() => ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: -10, description: 'bad' }))
       .toThrow(InvalidAmountError);
     expect(fs.existsSync(FILE)).toBe(false);
+  });
+
+  it('rejects a transfer to the same account without touching ledger.json', () => {
+    const ledger = new Ledger()
+    ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 100, description: 'seed' });
+    const before = fs.readFileSync(FILE, 'utf8');
+
+    expect(() => ledger.transfer('cash', 'cash', 50)).toThrow(SameAccountError);
+
+    expect(fs.readFileSync(FILE, 'utf8')).toBe(before);
+  });
+
+  it('rejects a transfer with a zero or negative amount without touching ledger.json', () => {
+    const ledger = new Ledger()
+    ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 100, description: 'seed' });
+    const before = fs.readFileSync(FILE, 'utf8');
+
+    expect(() => ledger.transfer('cash', 'savings', 0)).toThrow(InvalidAmountError);
+    expect(() => ledger.transfer('cash', 'savings', -10)).toThrow(InvalidAmountError);
+
+    expect(fs.readFileSync(FILE, 'utf8')).toBe(before);
+  });
+
+  it('rejects a transfer greater than the source balance without touching ledger.json', () => {
+    const ledger = new Ledger()
+    ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 100, description: 'seed' });
+    const before = fs.readFileSync(FILE, 'utf8');
+
+    expect(() => ledger.transfer('cash', 'savings', 150)).toThrow(InsufficientFundsError);
+
+    expect(fs.readFileSync(FILE, 'utf8')).toBe(before);
+  });
+
+  it('void() throws TransactionNotFoundError for an id that does not exist', () => {
+    const ledger = new Ledger()
+    expect(() => ledger.void(999)).toThrow(TransactionNotFoundError);
   });
 });

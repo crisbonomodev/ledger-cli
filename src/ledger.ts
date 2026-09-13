@@ -2,7 +2,7 @@ import * as fs from 'node:fs';
 import { LinkedList } from "./linkedList";
 import { Transaction, TransactionType, TransferResult } from './types/types';
 import { binarySearchFirst } from './binarySearch';
-import { InvalidAmountError } from './errors';
+import { InvalidAmountError, SameAccountError, InsufficientFundsError, TransactionNotFoundError } from './errors';
 
 
 
@@ -66,7 +66,10 @@ export class Ledger {
     }
 
     void(id: number): Transaction {
-        const original = this.findById(id)!
+        const original = this.findById(id)
+        if (!original) {
+            throw new TransactionNotFoundError(`Transaction #${id} not found`)
+        }
         return this.record({
             date: new Date().toISOString().slice(0, 10),
             account: original.account,
@@ -78,6 +81,16 @@ export class Ledger {
     }
 
     transfer(source: string, destination: string, amount: number): TransferResult {
+        if (source === destination) {
+            throw new SameAccountError(`Cannot transfer from ${source} to itself`)
+        }
+        if (amount <= 0) {
+            throw new InvalidAmountError(`Amount must be greater than zero, got ${amount}`)
+        }
+        if (this.balanceOf(source) < amount) {
+            throw new InsufficientFundsError(`Insufficient funds in ${source}: balance ${this.balanceOf(source)}, requested ${amount}`)
+        }
+
         const list = this.load()
         const date = new Date().toISOString().slice(0, 10)
 
