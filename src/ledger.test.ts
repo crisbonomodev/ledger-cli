@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import fs from 'fs';
 import { Ledger } from './ledger';
 import { TransactionType } from './types/types';
+import { InvalidAmountError } from './errors';
 
 const FILE = './ledger.json';
 
@@ -150,5 +151,19 @@ describe('ledger-cli', () => {
     const onDisk: unknown[] = JSON.parse(fs.readFileSync(FILE, 'utf8'));
     expect(onDisk[0]).toEqual(first);
     expect(onDisk[1]).toEqual(second);
+  });
+
+  it('rejects recording a transaction with a zero amount', () => {
+    const ledger = new Ledger()
+    expect(() => ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 0, description: 'bad' }))
+      .toThrow(InvalidAmountError);
+    expect(fs.existsSync(FILE)).toBe(false);
+  });
+
+  it('rejects recording a transaction with a negative amount', () => {
+    const ledger = new Ledger()
+    expect(() => ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: -10, description: 'bad' }))
+      .toThrow(InvalidAmountError);
+    expect(fs.existsSync(FILE)).toBe(false);
   });
 });

@@ -86,7 +86,7 @@
       "area": "ledger",
       "title": "Validation errors across record/transfer/void",
       "user_visible_behavior": "record() rejects zero/negative amounts, transfer() rejects same-account/invalid-amount/insufficient-funds cases, and void() rejects an unknown id -- all via typed LedgerError subclasses instead of crashes or silent bad state, and the CLI prints a readable message instead of a stack trace.",
-      "status": "not_started",
+      "status": "in_progress",
       "verification": [
         "Attempt record() with amount 0 or negative -- verify InvalidAmountError is thrown and nothing is written to ledger.json.",
         "Attempt transfer() with source === destination -- verify SameAccountError, no write.",
@@ -95,7 +95,7 @@
         "Trigger each case from the CLI and verify a readable message is printed, not a stack trace."
       ],
       "evidence": [],
-      "notes": "Sprint contract: harness/sprint-contracts/ledger-004-validation-errors.md -- read it before implementing. This feature is deliberately split across two implementer dispatches to give harness/session-handoff.md a real purpose: Session A builds src/errors.ts (LedgerError + 4 subclasses) and proves it on record() only, then writes session-handoff.md and stops. Session B must continue using only that handoff file to finish transfer()/void()/the CLI try-catch. Do not dispatch both halves as a single implementer run."
+      "notes": "Sprint contract: harness/sprint-contracts/ledger-004-validation-errors.md -- read it before implementing. This feature is deliberately split across two implementer dispatches to give harness/session-handoff.md a real purpose: Session A builds src/errors.ts (LedgerError + 4 subclasses) and proves it on record() only, then writes session-handoff.md and stops. Session B must continue using only that handoff file to finish transfer()/void()/the CLI try-catch. Do not dispatch both halves as a single implementer run. Session A complete -- see harness/session-handoff.md for what remains (transfer()'s 3 checks, void()'s not-found check, the CLI try/catch)."
     }
   ]
 }

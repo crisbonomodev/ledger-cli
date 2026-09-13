@@ -2,6 +2,7 @@ import * as fs from 'node:fs';
 import { LinkedList } from "./linkedList";
 import { Transaction, TransactionType, TransferResult } from './types/types';
 import { binarySearchFirst } from './binarySearch';
+import { InvalidAmountError } from './errors';
 
 
 
@@ -24,6 +25,10 @@ export class Ledger {
     }
 
     record(tx: Omit<Transaction, 'id'>) {
+        if (tx.amount <= 0) {
+            throw new InvalidAmountError(`Amount must be greater than zero, got ${tx.amount}`)
+        }
+
         const list = this.load()
         const full : Transaction = {id: list.size() + 1, ...tx}
         list.append(full)
