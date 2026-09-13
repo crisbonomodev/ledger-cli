@@ -79,6 +79,23 @@
         "Evaluator confirmed the sprint contract's exclusions were left genuinely unhandled with no speculative guards: reviewed the transfer() implementation and found no same-account check, no zero/negative amount check, and no insufficient-funds check -- matching the contract's explicit exclusions."
       ],
       "notes": "Sprint contract: harness/sprint-contracts/ledger-003-transfer.md. Evaluated and accepted by the evaluator agent: implementation matches the contract's data shapes (transferId?: number on Transaction, TransferResult interface in types.ts), the single load/save atomicity requirement (verified by code inspection: one load(), one save(), no internal record() calls), correct id assignment (debit gets the lower id, credit the next sequential id, both carrying transferId === debit.id), and append-only behavior (pre-existing transactions verified byte-for-byte unchanged and unreordered on disk). All contract exclusions (same-account transfer, zero/negative amount, insufficient funds, filesystem-level crash mid-write) were left genuinely unhandled, matching scope. All verification standards were independently re-run by the evaluator (npm run check && npm test, rm -rf dist && ./init.sh, and a manual CLI run in an isolated scratch dir with a hand-seeded ledger.json), not just trusted from the implementer's notes."
+    },
+    {
+      "id": "ledger-004",
+      "priority": 4,
+      "area": "ledger",
+      "title": "Validation errors across record/transfer/void",
+      "user_visible_behavior": "record() rejects zero/negative amounts, transfer() rejects same-account/invalid-amount/insufficient-funds cases, and void() rejects an unknown id -- all via typed LedgerError subclasses instead of crashes or silent bad state, and the CLI prints a readable message instead of a stack trace.",
+      "status": "not_started",
+      "verification": [
+        "Attempt record() with amount 0 or negative -- verify InvalidAmountError is thrown and nothing is written to ledger.json.",
+        "Attempt transfer() with source === destination -- verify SameAccountError, no write.",
+        "Attempt transfer() with amount <= 0 or greater than the source balance -- verify InvalidAmountError / InsufficientFundsError respectively, no write.",
+        "Attempt void() with a nonexistent id -- verify TransactionNotFoundError instead of a raw TypeError.",
+        "Trigger each case from the CLI and verify a readable message is printed, not a stack trace."
+      ],
+      "evidence": [],
+      "notes": "Sprint contract: harness/sprint-contracts/ledger-004-validation-errors.md -- read it before implementing. This feature is deliberately split across two implementer dispatches to give harness/session-handoff.md a real purpose: Session A builds src/errors.ts (LedgerError + 4 subclasses) and proves it on record() only, then writes session-handoff.md and stops. Session B must continue using only that handoff file to finish transfer()/void()/the CLI try-catch. Do not dispatch both halves as a single implementer run."
     }
   ]
 }

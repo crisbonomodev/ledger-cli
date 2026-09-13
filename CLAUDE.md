@@ -9,9 +9,12 @@ At the start of every session:
 1. Run `pwd` and confirm that you are in the expected repository root
 2. Read `harness/claude-progress.md`
 3. Read `harness/feature_list.json`
-4. Review recent commits with `git log --oneline -5`
-5. Run `./init.sh`
-6. Run `npm run check && npm test` to confirm the baseline is green.
+4. If `harness/session-handoff.md` exists, read it — it takes priority over
+   everything else for picking up exactly where the previous session stopped
+   mid-feature, and is deleted once the feature it covers reaches `passing`.
+5. Review recent commits with `git log --oneline -5`
+6. Run `./init.sh`
+7. Run `npm run check && npm test` to confirm the baseline is green.
 
 Then, select one unfinished feature, validate that the sprint contract exists for the selected task, and work only on that feature until you either verify it or document why it is blocked
 
@@ -32,7 +35,7 @@ Then, select one unfinished feature, validate that the sprint contract exists fo
 - harness/evaluator-rubric.md
 - harness/clean-state-checklist.md
 - init.sh
-- session-handoff.md when a compact handoff is useful
+- harness/session-handoff.md when a compact handoff is useful
 
 ## Completion Gate
 
