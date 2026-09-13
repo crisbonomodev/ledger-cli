@@ -64,4 +64,40 @@ describe('ledger-cli', () => {
     expect(history).toHaveLength(1);
     expect(history[0].transaction.description).toBe('cash tx');
   });
+
+  it('voiding a transaction appends a reversal with flipped type, same amount, and voidsId equal to the original id', () => {
+    const ledger = new Ledger()
+    const original = ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 100, description: 'initial deposit' });
+
+    const reversal = ledger.void(original.id);
+
+    expect(reversal.account).toBe(original.account);
+    expect(reversal.amount).toBe(original.amount);
+    expect(reversal.type).toBe(TransactionType.DEBIT);
+    expect(reversal.voidsId).toBe(original.id);
+  });
+
+  it('returns the balance to its pre-original-transaction value after voiding', () => {
+    const ledger = new Ledger()
+    ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 50, description: 'unrelated' });
+    const original = ledger.record({ date: '2026-01-02', account: 'cash', type: TransactionType.CREDIT, amount: 100, description: 'to be voided' });
+
+    expect(ledger.balanceOf('cash')).toBe(150);
+
+    ledger.void(original.id);
+
+    expect(ledger.balanceOf('cash')).toBe(50);
+  });
+
+  it('leaves the original transaction unchanged in history after voiding', () => {
+    const ledger = new Ledger()
+    const original = ledger.record({ date: '2026-01-01', account: 'cash', type: TransactionType.CREDIT, amount: 100, description: 'initial deposit' });
+
+    ledger.void(original.id);
+
+    const history = ledger.history('cash');
+    const originalEntry = history.find((h) => h.transaction.id === original.id);
+    expect(originalEntry?.transaction).toEqual(original);
+    expect(history).toHaveLength(2);
+  });
 });

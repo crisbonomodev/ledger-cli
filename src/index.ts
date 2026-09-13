@@ -30,6 +30,9 @@ if (cmd === 'record') {
         console.log('No transactions for the specified account')
     }
     entries.forEach(({ transaction, balance }) => console.log(`${transaction.date} #${transaction.id} ${transaction.type} ${transaction.amount} - ${transaction.description} | balance: ${balance}`))
+} else if (cmd === 'void') {
+    const reversal = ledger.void(Number(args[0]))
+    console.log(`#${reversal.id} voids #${reversal.voidsId} - ${reversal.account} ${reversal.type} ${reversal.amount}`)
 } else {
-    console.log('Usage: record <account> <credit|debit> <amount> <desc> | balance <account> | find <date> | history <account>')
+    console.log('Usage: record <account> <credit|debit> <amount> <desc> | balance <account> | find <date> | history <account> | void <id>')
 }

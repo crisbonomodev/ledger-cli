@@ -38,15 +38,23 @@
       "area": "ledger",
       "title": "Void a transaction without deleting it",
       "user_visible_behavior": "A user runs `void <id>` and a reversing transaction is appended (credit/debit flipped); the original transaction still exists in the history.",
-      "status": "not_started",
+      "status": "passing",
       "verification": [
         "Record a transaction and note its id.",
         "Run `void <id>`.",
         "Verify the balance returns to its value from before the original transaction.",
         "Verify the original transaction still appears in `history` — it was not deleted."
       ],
-      "evidence": [],
-      "notes": "Depends on ledger-001 to visually verify the effect on the history."
+      "evidence": [
+        "Evaluator re-ran npm run check && npm test independently (clean tree, no changes) -> tsc --noEmit clean, 9/9 tests pass (matches implementer's claim).",
+        "Evaluator confirmed rm -rf dist && ./init.sh completes end-to-end: npm install, npm run check && npm test (9/9 pass), npm run build -- all succeed from a clean dist/.",
+        "Evaluator read src/ledger.test.ts:68-102 and confirmed the 3 required tests genuinely test the contracted behaviors: (a) reversal has flipped type (DEBIT vs original CREDIT), same amount, voidsId === original.id; (b) balanceOf('cash') returns from 150 to 50 after voiding a +100 credit, i.e. back to its pre-original value; (c) history(cash) still contains the unchanged original transaction (toEqual(original)) plus the new reversal (length 2).",
+        "Evaluator built dist/ (npm run build) and independently ran the CLI in an isolated scratch dir with a hand-seeded ledger.json (id 1, cash, type 1/CREDIT, amount 100): `balance cash` -> 100; `void 1` -> printed '#2 voids #1 - cash 0 100'; `balance cash` -> 0; `history cash` showed #1 unchanged (credit 100, balance 100) and #2 (debit 100, voidsId 1, balance 0); ledger.json on disk shows original entry #1 byte-for-byte unchanged and #2 with voidsId: 1.",
+        "Evaluator confirmed the Transaction shape in src/types/types.ts matches the contract exactly: `voidsId?: number` added as the last optional field, absent on ordinary transactions and present only on reversals (verified in the seeded ledger.json above -- transaction #1 has no voidsId key at all).",
+        "Evaluator independently tested both explicit exclusions and confirmed no speculative handling was added: `void 999` (unknown id) throws an unhandled TypeError (Cannot read properties of undefined (reading 'account')) from src/ledger.ts's `findById(id)!` non-null assertion -- crashes rather than being caught/guarded; calling `void 1` twice in a row (double-void) is not detected or blocked -- it simply appends a second reversal (#3, voidsId 1) with no dedup/guard logic. Both match the contract's 'undefined, not required, not tested' exclusions with zero extra scope creep.",
+        "Evaluator reviewed the full diff of src/types/types.ts, src/ledger.ts, src/index.ts, src/ledger.test.ts against HEAD -- Ledger.void() is a thin wrapper around the existing record() (append-only, original never mutated or removed, consistent with CONVENTIONS.md's 'never mutate a saved transaction'), and `void <id>` is wired into the CLI switch in src/index.ts with a corresponding usage-string update."
+      ],
+      "notes": "Sprint contract: harness/sprint-contracts/ledger-002-void.md. Evaluated and accepted by the evaluator agent: implementation matches the contract's data shape (voidsId?: number, optional, only on reversals), required behavior (flipped type, same amount/account, voidsId, dated today, original untouched), and both explicit exclusions (unknown id, double-void) were left genuinely unhandled rather than given speculative guards. All verification standards from the contract were independently re-run and confirmed by the evaluator, not just trusted from the implementer's notes. Pre-existing, unrelated bug carried over from ledger-001 (the `record` CLI command doesn't parse 'credit'/'debit' strings into TransactionType, only raw numeric enum values) is still present -- out of scope for this feature."
     },
     {
       "id": "ledger-003",

@@ -5,6 +5,7 @@ export interface Transaction {
     type: TransactionType,
     amount: number,
     description: string,
+    voidsId?: number,
 }
 
 export enum TransactionType {

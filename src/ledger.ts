@@ -56,6 +56,22 @@ export class Ledger {
         })
     }
 
+    private findById(id: number): Transaction | undefined {
+        return this.load().toArray().find((tx) => tx.id === id)
+    }
+
+    void(id: number): Transaction {
+        const original = this.findById(id)!
+        return this.record({
+            date: new Date().toISOString().slice(0, 10),
+            account: original.account,
+            type: original.type === TransactionType.CREDIT ? TransactionType.DEBIT : TransactionType.CREDIT,
+            amount: original.amount,
+            description: `Void of #${original.id}: ${original.description}`,
+            voidsId: original.id,
+        })
+    }
+
     findByDate(date: string): Transaction[] {
         const sorted = [...this.load().toArray()].sort((a,b) => a.date.localeCompare(b.date))
         const dates = sorted.map((t)=> t.date)
